@@ -9,7 +9,8 @@
 			"extensions": [
 				"humao.rest-client",
 				"eamodio.gitlens",
-				"wholroyd.jinja"
+				"wholroyd.jinja",
+				"macabeus.vscode-fluent"
 			]
 		}
 	}
