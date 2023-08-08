@@ -8,7 +8,8 @@
 		"vscode": {
 			"extensions": [
 				"humao.rest-client",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"wholroyd.jinja"
 			]
 		}
 	}
