@@ -1,16 +1,18 @@
-use std::{net::SocketAddr, sync::OnceLock};
+use std::{collections::HashMap, net::SocketAddr};
 
 use askama::Template;
-use axum::{routing::get, Router};
+use axum::{extract::Query, routing::get, Router};
 use fluent_bundle::{bundle::FluentBundle, FluentResource};
 use intl_memoizer::concurrent::IntlLangMemoizer;
+
+mod i18n;
 
 #[tokio::main]
 async fn main() {
     // initialize tracing
     tracing_subscriber::fmt::init();
 
-    _ = TRANSLATOR.set(i18n::Translator::new());
+    i18n::Translator::setup();
 
     // build our application with a route
     let app = Router::new()
@@ -28,8 +30,12 @@ async fn main() {
 }
 
 // basic handler that responds with a static string
-async fn root() -> HelloTemplate<'static> {
-    let lang = &TRANSLATOR.get().unwrap().en;
+async fn root(Query(params): Query<HashMap<String, String>>) -> HelloTemplate<'static> {
+    let lang = params.get("lang").map_or("en", |s| s.as_str());
+
+    tracing::info!("Language: {}", lang);
+
+    let lang = i18n::Translator::get_lang(lang);
     HelloTemplate { lang }
 }
 
@@ -38,8 +44,6 @@ async fn root() -> HelloTemplate<'static> {
 struct HelloTemplate<'a> {
     lang: &'a FluentBundle<FluentResource, IntlLangMemoizer>,
 }
-
-static TRANSLATOR: OnceLock<i18n::Translator> = OnceLock::new();
 
 mod filters {
     use fluent_bundle::{bundle::FluentBundle, FluentResource};
@@ -58,32 +62,5 @@ mod filters {
             tracing::error!("Error: {}", error);
         }
         return Ok(value.to_string());
-    }
-}
-
-mod i18n {
-
-    use fluent_bundle::{bundle::FluentBundle, FluentResource};
-    use intl_memoizer::concurrent::IntlLangMemoizer;
-    use unic_langid::langid;
-
-    pub struct Translator {
-        pub en: FluentBundle<FluentResource, IntlLangMemoizer>,
-    }
-
-    impl Translator {
-        pub fn new() -> Self {
-            let langid_en = langid!("en");
-            let mut bundle_en = FluentBundle::new_concurrent(vec![langid_en]);
-
-            let res_en = FluentResource::try_new("hello-world = Hello, World!".to_string())
-                .expect("What could fail?");
-
-            bundle_en
-                .add_resource(res_en)
-                .expect("Why would this fail?");
-
-            Translator { en: bundle_en }
-        }
     }
 }
