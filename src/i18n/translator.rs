@@ -21,9 +21,9 @@ impl Translator {
         TRANSLATOR.get().expect("You need to call setup first")
     }
 
-    pub fn get_lang(lang: &str) -> &'static FluentBundle<FluentResource, IntlLangMemoizer> {
+    pub fn get_lang(langid: &LanguageIdentifier) -> &'static FluentBundle<FluentResource, IntlLangMemoizer> {
         let translator = Self::get();
-        let mut langid: LanguageIdentifier = lang.parse().unwrap_or(langid!("en"));
+        let mut langid: LanguageIdentifier = langid.clone();
 
         loop {
             if let Some(bundle) = translator.languages.get(&langid) {
