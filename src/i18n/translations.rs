@@ -2,6 +2,7 @@ use axum::{extract::FromRequestParts, http::request};
 
 use super::{FluentBundle, Translator, UserLanguage};
 
+
 pub struct Translations(pub &'static FluentBundle);
 
 #[axum::async_trait]

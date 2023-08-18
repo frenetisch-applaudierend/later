@@ -1,1 +1,5 @@
-{{ "hello-world"|fluent(lang) }}
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="font-medium text-red-500">{{ "hello-world"|fluent(lang) }}</h1>
+{% endblock %}
