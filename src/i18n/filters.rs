@@ -1,10 +1,7 @@
-use fluent_bundle::{bundle::FluentBundle, FluentResource};
-use intl_memoizer::concurrent::IntlLangMemoizer;
+use super::Translations;
 
-pub fn fluent(
-    val: &str,
-    lang: &FluentBundle<FluentResource, IntlLangMemoizer>,
-) -> askama::Result<String> {
+pub fn fluent(val: &str, lang: &Translations) -> askama::Result<String> {
+    let lang = lang.bundle;
     let msg = lang.get_message(val).expect("Could not read message");
     let pattern = msg.value().expect("Could not read value");
     let mut errors = vec![];

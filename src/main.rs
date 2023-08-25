@@ -2,7 +2,7 @@ use std::net::TcpListener;
 
 use askama::Template;
 use axum::{routing::get, Router};
-use i18n::{FluentBundle, Translations};
+use i18n::Translations;
 use listenfd::ListenFd;
 use tower_http::services::ServeDir;
 
@@ -35,21 +35,22 @@ async fn main() {
         listener.local_addr().unwrap()
     );
 
-    axum::Server::from_tcp(listener).unwrap()
+    axum::Server::from_tcp(listener)
+        .unwrap()
         .serve(app.into_make_service())
         .await
         .unwrap();
 }
 
 // basic handler that responds with a static string
-async fn root(Translations(lang): Translations) -> HelloTemplate<'static> {
-    HelloTemplate { lang }
+async fn root(translations: Translations) -> HelloTemplate {
+    HelloTemplate { translations }
 }
 
 #[derive(Template)]
 #[template(path = "hello.html")]
-struct HelloTemplate<'a> {
-    lang: &'a FluentBundle,
+struct HelloTemplate {
+    translations: Translations,
 }
 
 mod filters {
